@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ARTIST
+}
+
+model User {
+  id       Int        @id @default(autoincrement())
+  username String     @unique
+  email    String     @unique
+  password String
+  playlist Playlist[]
+  role     Role       @default(USER)
+
+  @@map("user")
+}
+
+model Playlist {
+  id             Int              @id @default(autoincrement())
+  title          String           @unique
+  subTitle       String
+  image          String
+  createdAt      DateTime         @default(now())
+  User           User?            @relation(fields: [userId], references: [id])
+  userId         Int?
+  playlist_music Playlist_Music[]
+
+  @@map("playlist")
+}
+
+model Music {
+  id             Int              @id @default(autoincrement())
+  title          String           @unique
+  artist         String           @unique
+  image          String
+  createdAt      DateTime         @default(now())
+  duration       Int
+  playlist_music Playlist_Music[]
+
+  @@map("music")
+}
+
+model Playlist_Music {
+  id Int @id @default(autoincrement())
+
+  Music      Music?    @relation(fields: [musicId], references: [id])
+  musicId    Int?
+  Playlist   Playlist? @relation(fields: [playlistId], references: [id])
+  playlistId Int?
+
+  @@map("playlist_music")
+}
